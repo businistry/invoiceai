@@ -5,6 +5,8 @@ import styles from './GLCodes.module.css'
 const GLCodes = () => {
   const [glCodes, setGLCodes] = useState([])
   const [newCode, setNewCode] = useState({ code: '', description: '', keywords: '' })
+  const [searchText, setSearchText] = useState('')
+  const [searchResult, setSearchResult] = useState(null)
 
   useEffect(() => {
     fetchGLCodes()
@@ -31,6 +33,20 @@ const GLCodes = () => {
       fetchGLCodes()
     } catch (error) {
       console.error('Error submitting GL Code:', error)
+    }
+  }
+
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value)
+  }
+
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await axios.post('/api/query-glcodes', { invoiceText: searchText })
+      setSearchResult(response.data)
+    } catch (error) {
+      console.error('Error querying GL Code:', error)
     }
   }
 
@@ -63,6 +79,22 @@ const GLCodes = () => {
         />
         <button type="submit">Add GL Code</button>
       </form>
+      <form onSubmit={handleSearchSubmit}>
+        <input
+          type="text"
+          value={searchText}
+          onChange={handleSearchChange}
+          placeholder="Search GL Codes by invoice text"
+        />
+        <button type="submit">Search</button>
+      </form>
+      {searchResult && (
+        <div>
+          <h3>Search Result</h3>
+          <p>GL Code: {searchResult.suggestedGLCode}</p>
+          <p>Description: {searchResult.description}</p>
+        </div>
+      )}
       <table className={styles.glCodesTable}>
         <thead>
           <tr>

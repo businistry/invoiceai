@@ -63,6 +63,41 @@ app.get('/api/glcodes', (req, res) => {
   })
 })
 
+app.post('/api/query-glcodes', async (req, res) => {
+  const { invoiceText } = req.body
+  if (!invoiceText || typeof invoiceText !== 'string') {
+    return res.status(400).json({ error: 'Invalid invoice text' })
+  }
+  if (invoiceText.length > 1000) {  // Adjust limit as needed
+    return res.status(400).json({ error: 'Invoice text too long' })
+  }
+  try {
+    const OPENAI_CONFIG = {
+      model: "text-davinci-002",
+      temperature: 0.3,  // Lower temperature for more focused results
+      max_tokens: 50,
+      presence_penalty: 0,
+      frequency_penalty: 0,
+    }
+
+    const completion = await openai.createCompletion({
+      ...OPENAI_CONFIG,
+      prompt: `Analyze the following invoice text and provide the most appropriate GL (General Ledger) code and description. Format your response exactly as: "CODE: description"\n\nInvoice text: ${invoiceText.trim()}\n\nGL Code and Description:`,
+    })
+
+    const result = completion.data.choices[0]?.text?.trim() ?? ''
+    const match = result.match(/^([^:]+):\s*(.+)$/i)
+    if (!match) {
+      return res.status(422).json({ error: 'Unable to parse GL code from response' })
+    }
+    const [, suggestedGLCode, description] = match
+
+    res.json({ suggestedGLCode, description })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
 app.get('/api/annotate/:filename', async (req, res) => {
   const { filename } = req.params
 
