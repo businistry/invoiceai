@@ -63,6 +63,25 @@ app.get('/api/glcodes', (req, res) => {
   })
 })
 
+app.post('/api/query-glcodes', async (req, res) => {
+  const { invoiceText } = req.body
+
+  try {
+    const completion = await openai.createCompletion({
+      model: "text-davinci-002",
+      prompt: `Based on the following invoice text, suggest the best matching GL code and its description:\n\n${invoiceText}\n\nGL Code and Description:`,
+      max_tokens: 50,
+    })
+
+    const result = completion.data.choices[0].text.trim()
+    const [suggestedGLCode, description] = result.split('\n')
+
+    res.json({ suggestedGLCode, description })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
 app.get('/api/annotate/:filename', async (req, res) => {
   const { filename } = req.params
 
