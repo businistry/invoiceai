@@ -65,7 +65,12 @@ app.get('/api/glcodes', (req, res) => {
 
 app.post('/api/query-glcodes', async (req, res) => {
   const { invoiceText } = req.body
-
+  if (!invoiceText || typeof invoiceText !== 'string') {
+    return res.status(400).json({ error: 'Invalid invoice text' })
+  }
+  if (invoiceText.length > 1000) {  // Adjust limit as needed
+    return res.status(400).json({ error: 'Invoice text too long' })
+  }
   try {
     const OPENAI_CONFIG = {
       model: "text-davinci-002",
