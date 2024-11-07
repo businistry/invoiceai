@@ -1,0 +1,55 @@
+.glCodes {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.glCodes h2 {
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+}
+
+.glCodes form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.glCodes input {
+  flex-grow: 1;
+  padding: 0.5rem;
+  background-color: var(--surface-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  color: var(--on-surface-color);
+}
+
+.glCodes button {
+  background-color: var(--primary-color);
+  color: var(--on-primary-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.glCodes button:hover {
+  background-color: #7c4dff;
+}
+
+.glCodesTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.glCodesTable th,
+.glCodesTable td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--surface-color);
+}
+
+.glCodesTable th {
+  background-color: var(--surface-color);
+  color: var(--secondary-color);
+}

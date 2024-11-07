@@ -1,0 +1,22 @@
+[
+  {
+    "code": "1000",
+    "description": "Cash",
+    "keywords": "cash,money,bank"
+  },
+  {
+    "code": "2000",
+    "description": "Accounts Payable",
+    "keywords": "payable,bills,invoices"
+  },
+  {
+    "code": "3000",
+    "description": "Revenue",
+    "keywords": "income,sales,earnings"
+  },
+  {
+    "code": "4000",
+    "description": "Expenses",
+    "keywords": "costs,expenditures,outgoings"
+  }
+]
