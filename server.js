@@ -80,8 +80,12 @@ app.post('/api/query-glcodes', async (req, res) => {
       prompt: `Analyze the following invoice text and provide the most appropriate GL (General Ledger) code and description. Format your response exactly as: "CODE: description"\n\nInvoice text: ${invoiceText.trim()}\n\nGL Code and Description:`,
     })
 
-    const result = completion.data.choices[0].text.trim()
-    const [suggestedGLCode, description] = result.split('\n')
+    const result = completion.data.choices[0]?.text?.trim() ?? ''
+    const match = result.match(/^([^:]+):\s*(.+)$/i)
+    if (!match) {
+      return res.status(422).json({ error: 'Unable to parse GL code from response' })
+    }
+    const [, suggestedGLCode, description] = match
 
     res.json({ suggestedGLCode, description })
   } catch (error) {
