@@ -4,6 +4,7 @@ import multer from 'multer'
 import { Configuration, OpenAIApi } from 'openai'
 import { PDFDocument } from 'pdf-lib'
 import fs from 'fs'
+import csv from 'csv-parser'
 
 const app = express()
 const port = 3000
@@ -132,6 +133,52 @@ app.get('/api/annotate/:filename', async (req, res) => {
     res.json({ message: 'Invoice annotated successfully', suggestedGLCode })
   } catch (error) {
     res.status(500).json({ error: error.message })
+  }
+})
+
+app.post('/api/upload-glcodes', upload.single('glcodes'), (req, res) => {
+  const { file } = req
+  if (!file) {
+    return res.status(400).json({ error: 'No file uploaded' })
+  }
+
+  const filePath = `uploads/${file.filename}`
+  const fileExtension = file.originalname.split('.').pop().toLowerCase()
+
+  if (fileExtension === 'csv') {
+    const glCodes = []
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on('data', (row) => {
+        glCodes.push(row)
+      })
+      .on('end', () => {
+        glCodes.forEach(({ code, description, keywords }) => {
+          db.run("INSERT INTO gl_codes (code, description, keywords) VALUES (?, ?, ?)", [code, description, keywords], (err) => {
+            if (err) {
+              console.error('Error inserting GL Code:', err.message)
+            }
+          })
+        })
+        res.json({ message: 'GL Codes uploaded and processed successfully' })
+      })
+  } else if (fileExtension === 'json') {
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        return res.status(500).json({ error: 'Error reading JSON file' })
+      }
+      const glCodes = JSON.parse(data)
+      glCodes.forEach(({ code, description, keywords }) => {
+        db.run("INSERT INTO gl_codes (code, description, keywords) VALUES (?, ?, ?)", [code, description, keywords], (err) => {
+          if (err) {
+            console.error('Error inserting GL Code:', err.message)
+          }
+        })
+      })
+      res.json({ message: 'GL Codes uploaded and processed successfully' })
+    })
+  } else {
+    res.status(400).json({ error: 'Unsupported file format' })
   }
 })
 

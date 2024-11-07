@@ -7,6 +7,7 @@ const GLCodes = () => {
   const [newCode, setNewCode] = useState({ code: '', description: '', keywords: '' })
   const [searchText, setSearchText] = useState('')
   const [searchResult, setSearchResult] = useState(null)
+  const [file, setFile] = useState(null)
 
   useEffect(() => {
     fetchGLCodes()
@@ -47,6 +48,28 @@ const GLCodes = () => {
       setSearchResult(response.data)
     } catch (error) {
       console.error('Error querying GL Code:', error)
+    }
+  }
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0])
+  }
+
+  const handleFileUpload = async (e) => {
+    e.preventDefault()
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('glcodes', file)
+
+    try {
+      const response = await axios.post('/api/upload-glcodes', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      alert(response.data.message)
+      fetchGLCodes()
+    } catch (error) {
+      console.error('Error uploading GL Codes file:', error)
     }
   }
 
@@ -95,6 +118,10 @@ const GLCodes = () => {
           <p>Description: {searchResult.description}</p>
         </div>
       )}
+      <form onSubmit={handleFileUpload}>
+        <input type="file" onChange={handleFileChange} accept=".csv, .json" />
+        <button type="submit">Upload GL Codes</button>
+      </form>
       <table className={styles.glCodesTable}>
         <thead>
           <tr>
