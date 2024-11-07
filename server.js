@@ -67,10 +67,17 @@ app.post('/api/query-glcodes', async (req, res) => {
   const { invoiceText } = req.body
 
   try {
-    const completion = await openai.createCompletion({
+    const OPENAI_CONFIG = {
       model: "text-davinci-002",
-      prompt: `Based on the following invoice text, suggest the best matching GL code and its description:\n\n${invoiceText}\n\nGL Code and Description:`,
+      temperature: 0.3,  // Lower temperature for more focused results
       max_tokens: 50,
+      presence_penalty: 0,
+      frequency_penalty: 0,
+    }
+
+    const completion = await openai.createCompletion({
+      ...OPENAI_CONFIG,
+      prompt: `Analyze the following invoice text and provide the most appropriate GL (General Ledger) code and description. Format your response exactly as: "CODE: description"\n\nInvoice text: ${invoiceText.trim()}\n\nGL Code and Description:`,
     })
 
     const result = completion.data.choices[0].text.trim()
